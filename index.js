@@ -4,12 +4,8 @@ const axios = require("axios");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
-// Load environment variables based on NODE_ENV
-const envFile =
-  process.env.NODE_ENV === "production"
-    ? ".env.production"
-    : ".env.development";
-dotenv.config({ path: envFile });
+// Load environment variables from Render.com's environment settings
+dotenv.config();
 
 // Extract environment variables
 const ENV = process.env;
@@ -35,15 +31,12 @@ app.set("trust proxy", 1);
 // Define constants
 const PORT = ENV.PORT || 3000;
 
-
-let token;
-
 app.get("/api/cryptocurrency", async (req, res) => {
   const { slug, currency } = req.query;
   let chartDataResponse;
+  let token;
 
   try {
-
     let response;
     if (currency) {
       const query = `https://api.dexscreener.com/latest/dex/search?q=${slug}/${currency}`;
@@ -53,6 +46,7 @@ app.get("/api/cryptocurrency", async (req, res) => {
         `https://api.dexscreener.com/latest/dex/search?q=${slug}/USDT`
       );
     }
+
     const pairs = response.data?.pairs;
     if (!pairs) {
       return res.json({
@@ -66,8 +60,8 @@ app.get("/api/cryptocurrency", async (req, res) => {
       return (
         pair?.chainId == "cronos" &&
         ((pair?.baseToken?.symbol?.trim()?.toLowerCase() == slug.trim()?.toLowerCase() ||
-          pair?.baseToken?.name?.trim()?.toLowerCase() == slug.trim()?.toLowerCase())
-          && (currency ? pair?.quoteToken?.symbol?.trim()?.toLowerCase() == currency?.toLowerCase() : pair?.quoteToken?.symbol?.trim()?.toLowerCase() == "usdt"))
+          pair?.baseToken?.name?.trim()?.toLowerCase() == slug.trim()?.toLowerCase()) &&
+          (currency ? pair?.quoteToken?.symbol?.trim()?.toLowerCase() == currency?.toLowerCase() : pair?.quoteToken?.symbol?.trim()?.toLowerCase() == "usdt"))
       );
     });
 
@@ -79,7 +73,7 @@ app.get("/api/cryptocurrency", async (req, res) => {
         chartData: null,
       });
     }
-    const chartQuery = `https://api.coingecko.com/api/v3/coins/cronos/contract/${token?.baseToken?.address}/market_chart?vs_currency=usd&days=365&interval=daily`
+    const chartQuery = `https://api.coingecko.com/api/v3/coins/cronos/contract/${token?.baseToken?.address}/market_chart?vs_currency=usd&days=365&interval=daily`;
     chartDataResponse = await axios.get(chartQuery);
     res.json({
       success: true,
