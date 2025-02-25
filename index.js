@@ -14,7 +14,7 @@ const ENV = process.env;
 const app = express();
 
 // Configure CORS
-const corsRoutes = ENV.CORS?.split(",") || ["http://localhost:3000"];
+const corsRoutes = 'https://crocreate.app/';
 app.use(
   cors({
     origin: corsRoutes,
